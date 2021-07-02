@@ -1,0 +1,5 @@
+1 数据库字段包含java关键字
+2 表字段首字母没有变成大写
+3 某些类型识别为Object (DbReadTableUtil.formatDataType()方法添加类别判断)
+    bigint -> Int 改为 Long
+    Object 改为对应的细分类型

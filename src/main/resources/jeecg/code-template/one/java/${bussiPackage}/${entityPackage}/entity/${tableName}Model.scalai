@@ -1,0 +1,28 @@
+<#macro output_field_name param1>
+    <#switch param1>
+            <#case "type">typee<#break>
+            <#case "class">clazz<#break>
+            <#default>${param1}<#break>
+        </#switch>
+</#macro>
+import java.sql.Date
+import play.api.Logger
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+import slick.collection.heterogeneous.HNil
+import slick.jdbc.JdbcProfile
+import slick.lifted.TableQuery
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
+@Singleton
+class ${tableName}Model @Inject()(
+    protected val dbConfigProvider: DatabaseConfigProvider,
+    protected val ${entityName?uncap_first}Repository: ${entityName}Repository
+)(implicit ec: ExecutionContext)
+     extends HasDatabaseConfigProvider[JdbcProfile]{
+     private val logger = Logger(getClass)
+     private val ${entityName?uncap_first}TableQuery = TableQuery[${entityName?uncap_first}Repository.${entityName}Table]
+     import profile.api._
+
+
+}

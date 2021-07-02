@@ -1,0 +1,70 @@
+package ${bussiPackage}.${entityPackage}.entity;
+
+import java.sql.Date
+import play.api.db.slick.DatabaseConfigProvider
+import slick.collection.heterogeneous.HNil
+import slick.jdbc.JdbcProfile
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
+
+<#function getfieldtypefun param1 >
+    <#switch param1>
+        <#case "java.lang.Integer"><#return Int><#break>
+        <#case "java.lang.Object"><#return Any><#break>
+        <#case "java.lang.String"><#return String><#break>
+        <#case "java.util.Date"><#return Date><#break>
+        <#case "java.lang.Float"><#return Float><#break>
+        <#default><#return param1><#break>
+    </#switch>
+</#function>
+<#macro output_field_type param1>
+    <#switch param1>
+            <#case "java.lang.Integer">Int<#break>
+            <#case "java.lang.Object">Any<#break>
+            <#case "java.lang.String">String<#break>
+            <#case "java.util.Date">Date<#break>
+            <#case "java.lang.Float">Float<#break>
+            <#default>${param1}<#break>
+        </#switch>
+</#macro>
+
+<#macro output_field_name param1>
+    <#switch param1>
+            <#case "type">typee<#break>
+            <#case "class">clazz<#break>
+            <#default>${param1}<#break>
+        </#switch>
+</#macro>
+/**
+ * @Description: ${tableVo.ftlDescription}
+ * @author：CodeGenerator
+ * @date：   ${.now?string["yyyy-MM-dd"]}
+ * @version： V1.0
+ */
+
+case class ${entityName}(
+    <#list originalColumns as po>
+	 <@output_field_name param1=po.fieldName/>: Option[<@output_field_type param1=po.fieldType/>]<#if po_has_next>,</#if>//${po.filedComment?replace("\r\n","")}
+	</#list>
+){}
+
+@Singleton
+class ${entityName}Repository @Inject() (dbConfigProvider: DatabaseConfigProvider)(
+    implicit ec: ExecutionContext
+){
+self =>
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
+  import dbConfig._
+  import profile.api._
+  class ${entityName}Table(tag: Tag) extends Table[${entityName}](tag, "${tableName}") {
+       <#list originalColumns as po>
+        def <@output_field_name param1=po.fieldName/>:Rep[Option[<@output_field_type param1=po.fieldType/>]] = column[Option[<@output_field_type param1=po.fieldType/>]]("${po.fieldName}")
+       </#list>
+       override def * =
+       (
+        <#list originalColumns as po>
+            <@output_field_name param1=po.fieldName/> <#if po_has_next>::<#else>:: HNil</#if>
+        </#list>
+       ).mapTo[${entityName}]
+  }
+}
