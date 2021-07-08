@@ -35,6 +35,39 @@ import scala.concurrent.ExecutionContext
             <#default>${param1}<#break>
         </#switch>
 </#macro>
+<#function dbFieldTypeMapping dbType >
+    <#if dbType?contains('char')>
+        <#return 'String'>
+    <#elseif dbType=='int'>
+        <#return 'Int'>
+    <#elseif dbType=='bigint'>
+        <#return 'Long'>
+    <#elseif dbType?contains('float')>
+        <#return 'Float'>
+    <#elseif dbType?contains('double')>
+        <#return 'Double'>
+    <#elseif dbType?contains('number')>
+        <#return 'Long'>
+    <#elseif dbType?contains('decimal')>
+        <#return 'BigDecimal'>
+    <#elseif dbType?contains('date')>
+        <#return 'LocalDate'>
+    <#elseif dbType?contains('time')>
+        <#return 'LocalDate'>
+    <#elseif dbType=='blob'>
+        <#return 'byte[]'>
+    <#elseif dbType=='clob'>
+        <#return 'Clob'>
+    <#elseif dbType=='numeric'>
+        <#return 'BigDecimal'>
+    <#elseif dbType=='bit'>
+        <#return 'Boolean'>
+    <#elseif dbType?contains('json')>
+        <#return 'JsValue'>
+    <#else>
+        <#return 'Any'>
+    </#if>
+</#function>
 /**
  * @Description: ${tableVo.ftlDescription}
  * @author：CodeGenerator
@@ -45,9 +78,9 @@ import scala.concurrent.ExecutionContext
 case class ${entityName}(
     <#list originalColumns as po>
         <#if po.nullable == 'Y'>
-            <@output_field_name param1=po.fieldName/>: Option[<@output_field_type param1=po.fieldType/>]<#if po_has_next>,</#if>//${po.filedComment?replace("\r\n","")}
+            <@output_field_name param1=po.fieldName/>: Option[${dbFieldTypeMapping(po.fieldDbType)}]<#if po_has_next>,</#if>//${po.filedComment?replace("\r\n","")}
         <#else>
-            <@output_field_name param1=po.fieldName/>: <@output_field_type param1=po.fieldType/><#if po_has_next>,</#if>//${po.filedComment?replace("\r\n","")}
+            <@output_field_name param1=po.fieldName/>: ${dbFieldTypeMapping(po.fieldDbType)}<#if po_has_next>,</#if>//${po.filedComment?replace("\r\n","")}
         </#if>
 	</#list>
 ){}
@@ -63,9 +96,9 @@ self =>
   class ${entityName}Table(tag: Tag) extends Table[${entityName}](tag, "${tableName}") {
        <#list originalColumns as po>
            <#if po.nullable == 'Y'>
-            def <@output_field_name param1=po.fieldName/>:Rep[Option[<@output_field_type param1=po.fieldType/>]] = column[Option[<@output_field_type param1=po.fieldType/>]]("${po.fieldName}")
+            def <@output_field_name param1=po.fieldName/>:Rep[Option[${dbFieldTypeMapping(po.fieldDbType)}]] = column[Option[${dbFieldTypeMapping(po.fieldDbType)}]]("${po.fieldName}")
            <#else>
-            def <@output_field_name param1=po.fieldName/>:Rep[<@output_field_type param1=po.fieldType/>] = column[<@output_field_type param1=po.fieldType/>]("${po.fieldName}")
+            def <@output_field_name param1=po.fieldName/>:Rep[${dbFieldTypeMapping(po.fieldDbType)}] = column[${dbFieldTypeMapping(po.fieldDbType)}]("${po.fieldName}")
            </#if>
        </#list>
        override def * =
