@@ -44,7 +44,11 @@ import scala.concurrent.ExecutionContext
 
 case class ${entityName}(
     <#list originalColumns as po>
-	 <@output_field_name param1=po.fieldName/>: Option[<@output_field_type param1=po.fieldType/>]<#if po_has_next>,</#if>//${po.filedComment?replace("\r\n","")}
+        <#if po.nullable == 'Y'>
+            <@output_field_name param1=po.fieldName/>: Option[<@output_field_type param1=po.fieldType/>]<#if po_has_next>,</#if>//${po.filedComment?replace("\r\n","")}
+        <#else>
+            <@output_field_name param1=po.fieldName/>: <@output_field_type param1=po.fieldType/><#if po_has_next>,</#if>//${po.filedComment?replace("\r\n","")}
+        </#if>
 	</#list>
 ){}
 
@@ -58,7 +62,11 @@ self =>
   import profile.api._
   class ${entityName}Table(tag: Tag) extends Table[${entityName}](tag, "${tableName}") {
        <#list originalColumns as po>
-        def <@output_field_name param1=po.fieldName/>:Rep[Option[<@output_field_type param1=po.fieldType/>]] = column[Option[<@output_field_type param1=po.fieldType/>]]("${po.fieldName}")
+           <#if po.nullable == 'Y'>
+            def <@output_field_name param1=po.fieldName/>:Rep[Option[<@output_field_type param1=po.fieldType/>]] = column[Option[<@output_field_type param1=po.fieldType/>]]("${po.fieldName}")
+           <#else>
+            def <@output_field_name param1=po.fieldName/>:Rep[<@output_field_type param1=po.fieldType/>] = column[<@output_field_type param1=po.fieldType/>]("${po.fieldName}")
+           </#if>
        </#list>
        override def * =
        (

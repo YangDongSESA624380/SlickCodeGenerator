@@ -1,2 +1,3 @@
 /.idea/
 /SlickCodeGenerator.iml
+/src/main/resources/jeecg/code-template/one/java/${bussiPackage}/${entityPackage}/entity/${entityName}1.scalai
