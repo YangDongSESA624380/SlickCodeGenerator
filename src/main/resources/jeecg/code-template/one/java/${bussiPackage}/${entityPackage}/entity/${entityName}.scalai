@@ -1,6 +1,6 @@
 package ${bussiPackage}.${entityPackage}.entity;
 
-import java.sql.Date
+import java.time.LocalDate
 import play.api.db.slick.DatabaseConfigProvider
 import slick.collection.heterogeneous.HNil
 import slick.jdbc.JdbcProfile
@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext
         <#case "java.lang.Integer"><#return Int><#break>
         <#case "java.lang.Object"><#return Any><#break>
         <#case "java.lang.String"><#return String><#break>
-        <#case "java.util.Date"><#return Date><#break>
+        <#case "java.util.Date"><#return LocalDate><#break>
         <#case "java.lang.Float"><#return Float><#break>
         <#default><#return param1><#break>
     </#switch>
@@ -22,7 +22,7 @@ import scala.concurrent.ExecutionContext
             <#case "java.lang.Integer">Int<#break>
             <#case "java.lang.Object">Any<#break>
             <#case "java.lang.String">String<#break>
-            <#case "java.util.Date">Date<#break>
+            <#case "java.util.Date">LocalDate<#break>
             <#case "java.lang.Float">Float<#break>
             <#default>${param1}<#break>
         </#switch>
