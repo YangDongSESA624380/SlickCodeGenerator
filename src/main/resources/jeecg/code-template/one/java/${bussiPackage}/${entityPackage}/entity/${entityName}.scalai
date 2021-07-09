@@ -68,6 +68,39 @@ import scala.concurrent.ExecutionContext
         <#return 'Any'>
     </#if>
 </#function>
+<#function getDefultValue dbType>
+ <#if dbType?contains('char')>
+        <#return '""'>
+    <#elseif dbType=='int'>
+        <#return '0'>
+    <#elseif dbType=='bigint'>
+        <#return '0'>
+    <#elseif dbType?contains('float')>
+        <#return '0'>
+    <#elseif dbType?contains('double')>
+        <#return '0'>
+    <#elseif dbType?contains('number')>
+        <#return '0'>
+    <#elseif dbType?contains('decimal')>
+        <#return '0'>
+    <#elseif dbType?contains('date')>
+        <#return 'LocalDate.now'>
+    <#elseif dbType?contains('time')>
+        <#return 'LocalDate.now'>
+    <#elseif dbType=='blob'>
+        <#return 'None'>
+    <#elseif dbType=='clob'>
+        <#return 'None'>
+    <#elseif dbType=='numeric'>
+        <#return '0'>
+    <#elseif dbType=='bit'>
+        <#return 'false'>
+    <#elseif dbType?contains('json')>
+        <#return 'Json.obj()'>
+    <#else>
+        <#return 'None'>
+    </#if>
+</#function>
 /**
  * @Description: ${tableVo.ftlDescription}
  * @author：CodeGenerator
@@ -84,7 +117,19 @@ case class ${entityName}(
         </#if>
 	</#list>
 ){}
-
+object ${entityName}{
+    def apply()={
+        new ${entityName}(
+            <#list originalColumns as po>
+            <#if po.nullable == 'Y'>
+                <@output_field_name param1=po.fieldName/>=None<#if po_has_next>,</#if>
+            <#else>
+                <@output_field_name param1=po.fieldName/>=${getDefultValue(po.fieldDbType)}<#if po_has_next>,</#if>
+            </#if>
+            </#list>
+        )
+    }
+}
 @Singleton
 class ${entityName}Repository @Inject() (dbConfigProvider: DatabaseConfigProvider)(
     implicit ec: ExecutionContext
