@@ -101,13 +101,45 @@ import scala.concurrent.ExecutionContext
         <#return 'None'>
     </#if>
 </#function>
+
+<#function getJsFunName dbType>
+ <#if dbType?contains('char')>
+        <#return 'JsString'>
+    <#elseif dbType=='int'>
+        <#return 'JsNumber'>
+    <#elseif dbType=='bigint'>
+        <#return 'JsNumber'>
+    <#elseif dbType?contains('float')>
+        <#return 'JsNumber'>
+    <#elseif dbType?contains('double')>
+        <#return 'JsNumber'>
+    <#elseif dbType?contains('number')>
+        <#return 'JsNumber'>
+    <#elseif dbType?contains('decimal')>
+        <#return 'JsNumber'>
+    <#elseif dbType?contains('date')>
+        <#return 'JsString'>
+    <#elseif dbType?contains('time')>
+        <#return 'JsString'>
+    <#elseif dbType=='blob'>
+        <#return 'None'>
+    <#elseif dbType=='clob'>
+        <#return 'None'>
+    <#elseif dbType=='numeric'>
+        <#return 'JsNumber'>
+    <#elseif dbType=='bit'>
+        <#return 'JsBoolean'>
+    <#else>
+        <#return 'None'>
+    </#if>
+</#function>
 /**
  * @Description: ${tableVo.ftlDescription}
  * @author：CodeGenerator
  * @date：   ${.now?string["yyyy-MM-dd"]}
  * @version： V1.0
  */
-
+import play.api.libs.json._
 case class ${entityName}(
     <#list originalColumns as po>
         <#if po.nullable == 'Y'>
@@ -129,28 +161,18 @@ object ${entityName}{
             </#list>
         )
     }
-}
-@Singleton
-class ${entityName}Repository @Inject() (dbConfigProvider: DatabaseConfigProvider)(
-    implicit ec: ExecutionContext
-){
-self =>
-  val dbConfig = dbConfigProvider.get[JdbcProfile]
-  import dbConfig._
-  import profile.api._
-  class ${entityName}Table(tag: Tag) extends Table[${entityName}](tag, "${tableName}") {
-       <#list originalColumns as po>
-           <#if po.nullable == 'Y'>
-            def <@output_field_name param1=po.fieldName/>:Rep[Option[${dbFieldTypeMapping(po.fieldDbType)}]] = column[Option[${dbFieldTypeMapping(po.fieldDbType)}]]("${po.fieldName}")
-           <#else>
-            def <@output_field_name param1=po.fieldName/>:Rep[${dbFieldTypeMapping(po.fieldDbType)}] = column[${dbFieldTypeMapping(po.fieldDbType)}]("${po.fieldName}")
-           </#if>
-       </#list>
-       override def * =
-       (
-        <#list originalColumns as po>
-            <@output_field_name param1=po.fieldName/> <#if po_has_next>::<#else>:: HNil</#if>
-        </#list>
-       ).mapTo[${entityName}]
-  }
+    implicit object ${entityName}Writes extends Writes[${entityName}]{
+        def Writes(input:${entityName}):JsValue=
+        new JsObject(
+            Map(
+                <#list originalColumns as po>
+                    <#if po.nullable == 'Y'>
+                       "<@output_field_name param1=po.fieldName/>" -> input.${po.fieldName}.map(${getJsFunName(po.fieldDbType)}(_)).getOrElse(JsNull)<#if po_has_next>,</#if>
+                    <#else>
+                       "<@output_field_name param1=po.fieldName/>" -> ${getJsFunName(po.fieldDbType)}(input.${po.fieldName})<#if po_has_next>,</#if>
+                    </#if>
+                </#list>
+            )
+        )
+    }
 }
