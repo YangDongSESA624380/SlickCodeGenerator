@@ -1,0 +1,133 @@
+package ${bussiPackage}.${entityPackage}.entity;
+
+import java.time.LocalDate
+import play.api.db.slick.DatabaseConfigProvider
+import slick.collection.heterogeneous.HNil
+import slick.jdbc.JdbcProfile
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext
+
+<#function getfieldtypefun param1 >
+    <#switch param1>
+        <#case "java.lang.Integer"><#return Int><#break>
+        <#case "java.lang.Object"><#return Any><#break>
+        <#case "java.lang.String"><#return String><#break>
+        <#case "java.util.Date"><#return LocalDate><#break>
+        <#case "java.lang.Float"><#return Float><#break>
+        <#default><#return param1><#break>
+    </#switch>
+</#function>
+<#macro output_field_type param1>
+    <#switch param1>
+            <#case "java.lang.Integer">Int<#break>
+            <#case "java.lang.Object">Any<#break>
+            <#case "java.lang.String">String<#break>
+            <#case "java.util.Date">LocalDate<#break>
+            <#case "java.lang.Float">Float<#break>
+            <#default>${param1}<#break>
+        </#switch>
+</#macro>
+
+<#macro output_field_name param1>
+    <#switch param1>
+            <#case "type">typee<#break>
+            <#case "class">clazz<#break>
+            <#default>${param1}<#break>
+        </#switch>
+</#macro>
+<#function dbFieldTypeMapping dbType >
+    <#if dbType?contains('char')>
+        <#return 'String'>
+    <#elseif dbType=='int'>
+        <#return 'Int'>
+    <#elseif dbType=='bigint'>
+        <#return 'Long'>
+    <#elseif dbType?contains('float')>
+        <#return 'Float'>
+    <#elseif dbType?contains('double')>
+        <#return 'Double'>
+    <#elseif dbType?contains('number')>
+        <#return 'Long'>
+    <#elseif dbType?contains('decimal')>
+        <#return 'BigDecimal'>
+    <#elseif dbType?contains('date')>
+        <#return 'LocalDate'>
+    <#elseif dbType?contains('time')>
+        <#return 'LocalDate'>
+    <#elseif dbType=='blob'>
+        <#return 'byte[]'>
+    <#elseif dbType=='clob'>
+        <#return 'Clob'>
+    <#elseif dbType=='numeric'>
+        <#return 'BigDecimal'>
+    <#elseif dbType=='bit'>
+        <#return 'Boolean'>
+    <#elseif dbType?contains('json')>
+        <#return 'JsValue'>
+    <#else>
+        <#return 'Any'>
+    </#if>
+</#function>
+<#function getDefultValue dbType>
+ <#if dbType?contains('char')>
+        <#return '""'>
+    <#elseif dbType=='int'>
+        <#return '0'>
+    <#elseif dbType=='bigint'>
+        <#return '0'>
+    <#elseif dbType?contains('float')>
+        <#return '0'>
+    <#elseif dbType?contains('double')>
+        <#return '0'>
+    <#elseif dbType?contains('number')>
+        <#return '0'>
+    <#elseif dbType?contains('decimal')>
+        <#return '0'>
+    <#elseif dbType?contains('date')>
+        <#return 'LocalDate.now'>
+    <#elseif dbType?contains('time')>
+        <#return 'LocalDate.now'>
+    <#elseif dbType=='blob'>
+        <#return 'None'>
+    <#elseif dbType=='clob'>
+        <#return 'None'>
+    <#elseif dbType=='numeric'>
+        <#return '0'>
+    <#elseif dbType=='bit'>
+        <#return 'false'>
+    <#elseif dbType?contains('json')>
+        <#return 'Json.obj()'>
+    <#else>
+        <#return 'None'>
+    </#if>
+</#function>
+/**
+ * @Description: ${tableVo.ftlDescription}
+ * @author：CodeGenerator
+ * @date：   ${.now?string["yyyy-MM-dd"]}
+ * @version： V1.0
+ */
+@Singleton
+class ${entityName}Repository @Inject() (dbConfigProvider: DatabaseConfigProvider)(
+    implicit ec: ExecutionContext
+){
+self =>
+  val dbConfig = dbConfigProvider.get[JdbcProfile]
+  import dbConfig._
+  import profile.api._
+  class ${entityName}Table(tag: Tag) extends Table[${entityName}](tag, "${tableName}") {
+       <#list originalColumns as po>
+           <#if po.nullable == 'Y'>
+            def <@output_field_name param1=po.fieldName/>:Rep[Option[${dbFieldTypeMapping(po.fieldDbType)}]] = column[Option[${dbFieldTypeMapping(po.fieldDbType)}]]("${po.fieldName}")
+           <#else>
+            def <@output_field_name param1=po.fieldName/>:Rep[${dbFieldTypeMapping(po.fieldDbType)}] = column[${dbFieldTypeMapping(po.fieldDbType)}]("${po.fieldName}")
+           </#if>
+       </#list>
+       override def * =
+       (
+        <#list originalColumns as po>
+            <@output_field_name param1=po.fieldName/> <#if po_has_next>::<#else>:: HNil</#if>
+        </#list>
+       ).mapTo[${entityName}]
+  }
+}
