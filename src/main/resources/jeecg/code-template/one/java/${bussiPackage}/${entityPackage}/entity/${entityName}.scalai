@@ -1,18 +1,14 @@
 package ${bussiPackage}.${entityPackage}.entity;
 
-import java.time.LocalDate
-import play.api.db.slick.DatabaseConfigProvider
-import slick.collection.heterogeneous.HNil
-import slick.jdbc.JdbcProfile
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 <#function getfieldtypefun param1 >
     <#switch param1>
         <#case "java.lang.Integer"><#return Int><#break>
         <#case "java.lang.Object"><#return Any><#break>
         <#case "java.lang.String"><#return String><#break>
-        <#case "java.util.Date"><#return LocalDate><#break>
+        <#case "java.util.Date"><#return LocalDateTime><#break>
         <#case "java.lang.Float"><#return Float><#break>
         <#default><#return param1><#break>
     </#switch>
@@ -22,7 +18,7 @@ import scala.concurrent.ExecutionContext
             <#case "java.lang.Integer">Int<#break>
             <#case "java.lang.Object">Any<#break>
             <#case "java.lang.String">String<#break>
-            <#case "java.util.Date">LocalDate<#break>
+            <#case "java.util.Date">LocalDateTime<#break>
             <#case "java.lang.Float">Float<#break>
             <#default>${param1}<#break>
         </#switch>
@@ -51,9 +47,9 @@ import scala.concurrent.ExecutionContext
     <#elseif dbType?contains('decimal')>
         <#return 'BigDecimal'>
     <#elseif dbType?contains('date')>
-        <#return 'LocalDate'>
+        <#return 'LocalDateTime'>
     <#elseif dbType?contains('time')>
-        <#return 'LocalDate'>
+        <#return 'LocalDateTime'>
     <#elseif dbType=='blob'>
         <#return 'byte[]'>
     <#elseif dbType=='clob'>
@@ -84,9 +80,9 @@ import scala.concurrent.ExecutionContext
     <#elseif dbType?contains('decimal')>
         <#return '0'>
     <#elseif dbType?contains('date')>
-        <#return 'LocalDate.now'>
+        <#return 'LocalDateTime.now'>
     <#elseif dbType?contains('time')>
-        <#return 'LocalDate.now'>
+        <#return 'LocalDateTime.now'>
     <#elseif dbType=='blob'>
         <#return 'None'>
     <#elseif dbType=='clob'>
@@ -117,8 +113,6 @@ import scala.concurrent.ExecutionContext
         <#return 'JsNumber'>
     <#elseif dbType?contains('decimal')>
         <#return 'JsNumber'>
-    <#elseif dbType?contains('date')>
-        <#return 'JsString'>
     <#elseif dbType?contains('time')>
         <#return 'JsString'>
     <#elseif dbType=='blob'>
@@ -162,14 +156,22 @@ object ${entityName}{
         )
     }
     implicit object ${entityName}Writes extends Writes[${entityName}]{
-        def Writes(input:${entityName}):JsValue=
+        def writes(input:${entityName}):JsValue=
         new JsObject(
             Map(
                 <#list originalColumns as po>
                     <#if po.nullable == 'Y'>
-                       "<@output_field_name param1=po.fieldName/>" -> input.${po.fieldName}.map(${getJsFunName(po.fieldDbType)}(_)).getOrElse(JsNull)<#if po_has_next>,</#if>
+                        <#if po.fieldDbType?contains('date')>
+                            "<@output_field_name param1=po.fieldName/>" -> input.${po.fieldName}.map(i =>JsString(i.format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")))).getOrElse(JsNull)<#if po_has_next>,</#if>
+                        <#else>
+                            "<@output_field_name param1=po.fieldName/>" -> input.${po.fieldName}.map(${getJsFunName(po.fieldDbType)}(_)).getOrElse(JsNull)<#if po_has_next>,</#if>
+                        </#if>
                     <#else>
-                       "<@output_field_name param1=po.fieldName/>" -> ${getJsFunName(po.fieldDbType)}(input.${po.fieldName})<#if po_has_next>,</#if>
+                        <#if po.fieldDbType?contains('date')>
+                            "<@output_field_name param1=po.fieldName/>" -> JsString(input.${po.fieldName}.format(DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss")))<#if po_has_next>,</#if>
+                        <#else>
+                            "<@output_field_name param1=po.fieldName/>" -> ${getJsFunName(po.fieldDbType)}(input.${po.fieldName})<#if po_has_next>,</#if>
+                        </#if>
                     </#if>
                 </#list>
             )
