@@ -1,28 +1,19 @@
 package ${bussiPackage}.${entityPackage}.entity;
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 import play.api.db.slick.DatabaseConfigProvider
 import slick.collection.heterogeneous.HNil
 import slick.jdbc.JdbcProfile
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 
-<#function getfieldtypefun param1 >
-    <#switch param1>
-        <#case "java.lang.Integer"><#return Int><#break>
-        <#case "java.lang.Object"><#return Any><#break>
-        <#case "java.lang.String"><#return String><#break>
-        <#case "java.util.Date"><#return LocalDate><#break>
-        <#case "java.lang.Float"><#return Float><#break>
-        <#default><#return param1><#break>
-    </#switch>
-</#function>
+
 <#macro output_field_type param1>
     <#switch param1>
             <#case "java.lang.Integer">Int<#break>
             <#case "java.lang.Object">Any<#break>
             <#case "java.lang.String">String<#break>
-            <#case "java.util.Date">LocalDate<#break>
+            <#case "java.util.Date">LocalDateTime<#break>
             <#case "java.lang.Float">Float<#break>
             <#default>${param1}<#break>
         </#switch>
@@ -51,9 +42,9 @@ import scala.concurrent.ExecutionContext
     <#elseif dbType?contains('decimal')>
         <#return 'BigDecimal'>
     <#elseif dbType?contains('date')>
-        <#return 'LocalDate'>
+        <#return 'LocalDateTime'>
     <#elseif dbType?contains('time')>
-        <#return 'LocalDate'>
+        <#return 'LocalDateTime'>
     <#elseif dbType=='blob'>
         <#return 'byte[]'>
     <#elseif dbType=='clob'>
@@ -64,6 +55,8 @@ import scala.concurrent.ExecutionContext
         <#return 'Boolean'>
     <#elseif dbType?contains('json')>
         <#return 'JsValue'>
+    <#elseif dbType=='tinyint'>
+            <#return 'Int'>
     <#else>
         <#return 'Any'>
     </#if>
@@ -84,9 +77,9 @@ import scala.concurrent.ExecutionContext
     <#elseif dbType?contains('decimal')>
         <#return '0'>
     <#elseif dbType?contains('date')>
-        <#return 'LocalDate.now'>
+        <#return 'LocalDateTime.now'>
     <#elseif dbType?contains('time')>
-        <#return 'LocalDate.now'>
+        <#return 'LocalDateTime.now'>
     <#elseif dbType=='blob'>
         <#return 'None'>
     <#elseif dbType=='clob'>
@@ -97,6 +90,40 @@ import scala.concurrent.ExecutionContext
         <#return 'false'>
     <#elseif dbType?contains('json')>
         <#return 'Json.obj()'>
+     <#elseif dbType=='tinyint'>
+         <#return '0'>
+    <#else>
+        <#return 'None'>
+    </#if>
+</#function>
+
+<#function getJsFunName dbType>
+ <#if dbType?contains('char')>
+        <#return 'JsString'>
+    <#elseif dbType=='int'>
+        <#return 'JsNumber'>
+    <#elseif dbType=='bigint'>
+        <#return 'JsNumber'>
+    <#elseif dbType?contains('float')>
+        <#return 'JsNumber'>
+    <#elseif dbType?contains('double')>
+        <#return 'JsNumber'>
+    <#elseif dbType?contains('number')>
+        <#return 'JsNumber'>
+    <#elseif dbType?contains('decimal')>
+        <#return 'JsNumber'>
+    <#elseif dbType?contains('time')>
+        <#return 'JsString'>
+    <#elseif dbType=='blob'>
+        <#return 'None'>
+    <#elseif dbType=='clob'>
+        <#return 'None'>
+    <#elseif dbType=='numeric'>
+        <#return 'JsNumber'>
+    <#elseif dbType=='bit'>
+        <#return 'JsBoolean'>
+    <#elseif dbType=='tinyint'>
+        <#return 'JsNumber'>
     <#else>
         <#return 'None'>
     </#if>

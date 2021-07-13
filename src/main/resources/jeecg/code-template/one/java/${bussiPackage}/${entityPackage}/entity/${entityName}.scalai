@@ -3,16 +3,6 @@ package ${bussiPackage}.${entityPackage}.entity;
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-<#function getfieldtypefun param1 >
-    <#switch param1>
-        <#case "java.lang.Integer"><#return Int><#break>
-        <#case "java.lang.Object"><#return Any><#break>
-        <#case "java.lang.String"><#return String><#break>
-        <#case "java.util.Date"><#return LocalDateTime><#break>
-        <#case "java.lang.Float"><#return Float><#break>
-        <#default><#return param1><#break>
-    </#switch>
-</#function>
 <#macro output_field_type param1>
     <#switch param1>
             <#case "java.lang.Integer">Int<#break>
@@ -60,6 +50,8 @@ import java.time.format.DateTimeFormatter
         <#return 'Boolean'>
     <#elseif dbType?contains('json')>
         <#return 'JsValue'>
+    <#elseif dbType=='tinyint'>
+            <#return 'Int'>
     <#else>
         <#return 'Any'>
     </#if>
@@ -93,6 +85,8 @@ import java.time.format.DateTimeFormatter
         <#return 'false'>
     <#elseif dbType?contains('json')>
         <#return 'Json.obj()'>
+     <#elseif dbType=='tinyint'>
+         <#return '0'>
     <#else>
         <#return 'None'>
     </#if>
@@ -123,6 +117,8 @@ import java.time.format.DateTimeFormatter
         <#return 'JsNumber'>
     <#elseif dbType=='bit'>
         <#return 'JsBoolean'>
+    <#elseif dbType=='tinyint'>
+        <#return 'JsNumber'>
     <#else>
         <#return 'None'>
     </#if>
