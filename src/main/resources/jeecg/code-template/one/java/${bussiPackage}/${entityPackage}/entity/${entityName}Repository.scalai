@@ -135,7 +135,7 @@ import scala.concurrent.ExecutionContext
  * @version： V1.0
  */
 @Singleton
-class ${entityName}Repository @Inject() (dbConfigProvider: DatabaseConfigProvider)(
+class ${entityName}Repository @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)(
     implicit ec: ExecutionContext
 ){
 self =>
